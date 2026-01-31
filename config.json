@@ -3,6 +3,8 @@
   "slotMinutes": 120,
   "advanceDays": 7,
   "cabinCount": 4,
+  "priceSingle": 2000,
+  "pricePerPerson": 1300,
   "openingHours": {
     "mon": { "open": "10:00", "close": "23:00" },
     "tue": { "open": "10:00", "close": "23:00" },
