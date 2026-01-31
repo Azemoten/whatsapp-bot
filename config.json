@@ -1,0 +1,15 @@
+{
+  "timezone": "Asia/Almaty",
+  "slotMinutes": 120,
+  "advanceDays": 7,
+  "cabinCount": 4,
+  "openingHours": {
+    "mon": { "open": "10:00", "close": "23:00" },
+    "tue": { "open": "10:00", "close": "23:00" },
+    "wed": { "open": "10:00", "close": "23:00" },
+    "thu": { "open": "10:00", "close": "23:00" },
+    "fri": { "open": "10:00", "close": "01:00" },
+    "sat": { "open": "10:00", "close": "01:00" },
+    "sun": { "open": "10:00", "close": "23:00" }
+  }
+}
