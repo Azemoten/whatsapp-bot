@@ -41,6 +41,7 @@ async function start() {
     if (msg.key.fromMe) return;
 
     const jid = msg.key.remoteJid;
+    const phone = sock.user.id.split(':')[0];
 
     const text =
       msg.message.conversation ||
@@ -59,9 +60,9 @@ async function start() {
       return send(sock, jid, `Сбросил. ${helpText()}`);
     }
     if (t === "/book" || t === "бронь" || t === "забронировать" || t === "бронировать") return handleBookStart(sock, jid, getSession);
-    if (t === "/booknow") return handleBookNow(sock, jid, toPhone);
-    if (t === "/my") return handleMy(sock, jid, toPhone);
-    if (t.startsWith("/cancel") || ["отмена", "отменить", "отказ", "возврат"].some(word => t.startsWith(word + " ") || t === word)) return handleCancel(sock, jid, t, toPhone);
+    if (t === "/booknow") return handleBookNow(sock, jid, phone);
+    if (t === "/my") return handleMy(sock, jid, phone);
+    if (t.startsWith("/cancel") || ["отмена", "отменить", "отказ", "возврат"].some(word => t.startsWith(word + " ") || t === word)) return handleCancel(sock, jid, t, phone);
 
     // Если человек просто написал "привет" — подсказка
     const s = getSession(jid);
@@ -74,7 +75,7 @@ async function start() {
     if (s.step === "CHOOSE_SLOT") return handleChooseSlot(sock, jid, t, getSession);
     if (s.step === "CHOOSE_CABIN") return handleChooseCabin(sock, jid, t, getSession);
     if (s.step === "CHOOSE_PEOPLE") return handleChoosePeople(sock, jid, t, getSession);
-    if (s.step === "CONFIRM") return handleConfirm(sock, jid, t, getSession, toPhone);
+    if (s.step === "CONFIRM") return handleConfirm(sock, jid, t, getSession, phone);
 
     // Фоллбек
     return send(sock, jid, `Не понял. ${helpText()}`);

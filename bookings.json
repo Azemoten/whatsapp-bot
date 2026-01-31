@@ -1,10 +1,12 @@
 [
   {
-    "id": "3a813f3a",
-    "phone": "180526216433721@lid",
+    "id": "8d763cb7",
+    "phone": "77066041997",
     "cabinNumber": 4,
-    "startISO": "2026-02-10T05:00:00.000Z",
-    "endISO": "2026-02-10T07:00:00.000Z",
-    "createdAtISO": "2026-01-31T17:26:37.850Z"
+    "startISO": "2026-01-31T05:00:00.000Z",
+    "endISO": "2026-01-31T07:00:00.000Z",
+    "numberOfPeople": 1,
+    "totalPrice": 2000,
+    "createdAtISO": "2026-01-31T18:35:48.723Z"
   }
 ]

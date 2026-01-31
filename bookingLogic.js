@@ -251,7 +251,7 @@ export async function handleChoosePeople(sock, jid, text, getSession) {
   );
 }
 
-export async function handleConfirm(sock, jid, text, getSession, toPhone) {
+export async function handleConfirm(sock, jid, text, getSession, phone) {
   const s = getSession(jid);
   const yes = ["да", "yes", "y", "+", "ok"].includes(text.toLowerCase());
   const no = ["нет", "no", "n", "-", "cancel"].includes(text.toLowerCase());
@@ -279,7 +279,7 @@ export async function handleConfirm(sock, jid, text, getSession, toPhone) {
 
   const booking = {
     id: crypto.randomBytes(4).toString("hex"),
-    phone: toPhone(jid),
+    phone: phone,
     cabinNumber: s.cabinNumber,
     startISO: slot.startISO,
     endISO: slot.endISO,
@@ -304,7 +304,7 @@ export async function handleConfirm(sock, jid, text, getSession, toPhone) {
   );
 }
 
-export async function handleBookNow(sock, jid, toPhone) {
+export async function handleBookNow(sock, jid, phone) {
   const today = dayjs().tz(cfg.timezone).startOf("day").format("YYYY-MM-DD");
   const slots = buildSlots(today);
   if (!slots.length) {
@@ -342,7 +342,7 @@ export async function handleBookNow(sock, jid, toPhone) {
 
   const booking = {
     id: crypto.randomBytes(4).toString("hex"),
-    phone: toPhone(jid),
+    phone: phone,
     cabinNumber,
     startISO: nextSlot.startISO,
     endISO: nextSlot.endISO,

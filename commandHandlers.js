@@ -2,8 +2,7 @@ import dayjs from "dayjs";
 import { storage } from "./storage.js";
 import { toPhone, fmtDate, send, cfg } from "./utils.js";
 
-export async function handleMy(sock, jid, toPhone) {
-  const phone = toPhone(jid);
+export async function handleMy(sock, jid, phone) {
   const items = storage.listByPhone(phone).sort((a, b) => a.startISO.localeCompare(b.startISO));
 
   if (!items.length) {
@@ -24,7 +23,7 @@ export async function handleMy(sock, jid, toPhone) {
   await send(sock, jid, text + `\n\nОтменить бронь: /cancel <номер>`);
 }
 
-export async function handleCancel(sock, jid, text, toPhone) {
+export async function handleCancel(sock, jid, text, phone) {
   const parts = text.trim().split(/\s+/);
   const first = parts[0];
 
@@ -46,7 +45,6 @@ export async function handleCancel(sock, jid, text, toPhone) {
     return;
   }
 
-  const phone = toPhone(jid);
   const items = storage.listByPhone(phone).sort((a, b) => a.startISO.localeCompare(b.startISO));
 
   if (num > items.length) {

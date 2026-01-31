@@ -9,9 +9,38 @@ dayjs.extend(timezone);
 export const cfg = JSON.parse(fs.readFileSync("./config.json", "utf-8"));
 dayjs.tz.setDefault(cfg.timezone);
 
-export function toPhone(fromJid) {
-  return String(fromJid).replace("whatsapp:", "");
+export function toPhone(phone) {
+  return String(phone);
 }
+
+// const phoneCache = new Map();
+
+// async function getPhone(sock, msg) {
+//   const jid =
+//     msg.key.participant ||
+//     msg.key.remoteJid;
+
+//   if (phoneCache.has(jid)) {
+//     return phoneCache.get(jid)!;
+//   }
+
+//   let phone: string | null = null;
+
+//   if (jid.endsWith("@s.whatsapp.net")) {
+//     phone = jid.replace("@s.whatsapp.net", "");
+//   } else {
+//     const [res] = await sock.onWhatsApp(jid);
+//     if (res?.jid) {
+//       phone = res.jid.replace("@s.whatsapp.net", "");
+//     }
+//   }
+
+//   if (!phone) throw new Error("PHONE_NOT_FOUND");
+
+//   phoneCache.set(jid, phone);
+//   return phone;
+// }
+
 
 export function getWeekKey(d) {
   const map = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
