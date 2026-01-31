@@ -303,3 +303,65 @@ export async function handleConfirm(sock, jid, text, getSession, toPhone) {
       `Посмотреть брони: /my`
   );
 }
+
+export async function handleBookNow(sock, jid, toPhone) {
+  const today = dayjs().tz(cfg.timezone).startOf("day").format("YYYY-MM-DD");
+  const slots = buildSlots(today);
+  if (!slots.length) {
+    await send(sock, jid, `Сегодня нет доступных слотов для быстрой брони.`);
+    return;
+  }
+
+  const bookings = storage.list();
+  const available = slots
+    .map(slot => {
+      const freeCabins = [];
+      for (let c = 1; c <= cfg.cabinCount; c++) {
+        if (isCabinFree(c, slot, bookings)) freeCabins.push(c);
+      }
+      return { slot, freeCabins };
+    })
+    .filter(x => x.freeCabins.length > 0)
+    .sort((a, b) => a.slot.startISO.localeCompare(b.slot.startISO)); // earliest first
+
+  if (!available.length) {
+    await send(sock, jid, `Сегодня всё занято.`);
+    return;
+  }
+
+  const nextSlot = available[0].slot;
+  const cabinNumber = available[0].freeCabins[0]; // first free cabin
+  const numberOfPeople = 1;
+  const totalPrice = cfg.priceSingle;
+
+  // Check again if still free
+  if (!isCabinFree(cabinNumber, nextSlot, bookings)) {
+    await send(sock, jid, `К сожалению, слот только что заняли. Попробуйте /book`);
+    return;
+  }
+
+  const booking = {
+    id: crypto.randomBytes(4).toString("hex"),
+    phone: toPhone(jid),
+    cabinNumber,
+    startISO: nextSlot.startISO,
+    endISO: nextSlot.endISO,
+    numberOfPeople,
+    totalPrice,
+    createdAtISO: dayjs().toISOString()
+  };
+
+  storage.add(booking);
+
+  await send(
+    sock,
+    jid,
+    `✅ Быстрая бронь создана!\n` +
+      `Дата: ${fmtDate(today)}\n` +
+      `Время: ${fmtSlot(nextSlot)}\n` +
+      `Кабинка: ${cabinNumber}\n` +
+      `Количество человек: 1\n` +
+      `Стоимость: ${totalPrice} тенге\n\n` +
+      `Посмотреть брони: /my`
+  );
+}

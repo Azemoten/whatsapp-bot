@@ -3,7 +3,7 @@ import P from "pino";
 import qrcode from "qrcode-terminal";
 import { getSession, resetSession } from "./sessionManager.js";
 import { send, helpText, toPhone } from "./utils.js";
-import { generateAvailabilityTable, handleBookStart, handleChooseDate, handleChooseSlot, handleChooseCabin, handleChoosePeople, handleConfirm } from "./bookingLogic.js";
+import { generateAvailabilityTable, handleBookStart, handleChooseDate, handleChooseSlot, handleChooseCabin, handleChoosePeople, handleConfirm, handleBookNow } from "./bookingLogic.js";
 import { handleMy, handleCancel } from "./commandHandlers.js";
 
 async function start() {
@@ -59,6 +59,7 @@ async function start() {
       return send(sock, jid, `Сбросил. ${helpText()}`);
     }
     if (t === "/book" || t === "бронь" || t === "забронировать" || t === "бронировать") return handleBookStart(sock, jid, getSession);
+    if (t === "/booknow") return handleBookNow(sock, jid, toPhone);
     if (t === "/my") return handleMy(sock, jid, toPhone);
     if (t.startsWith("/cancel") || ["отмена", "отменить", "отказ", "возврат"].some(word => t.startsWith(word + " ") || t === word)) return handleCancel(sock, jid, t, toPhone);
 
