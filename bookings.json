@@ -7,6 +7,18 @@
     "endISO": "2026-01-31T07:00:00.000Z",
     "numberOfPeople": 1,
     "totalPrice": 2000,
+    "status": "paid",
     "createdAtISO": "2026-01-31T18:35:48.723Z"
+  },
+  {
+    "id": "fe0c9ff4",
+    "phone": "admin-1769929646697",
+    "cabinNumber": 1,
+    "startISO": "2026-02-01T10:07:00.000Z",
+    "endISO": "2026-02-01T11:07:00.000Z",
+    "numberOfPeople": 2,
+    "totalPrice": 2600,
+    "status": "pending",
+    "createdAtISO": "2026-02-01T07:07:26.703Z"
   }
 ]

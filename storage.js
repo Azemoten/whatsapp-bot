@@ -18,7 +18,8 @@ function writeAll(items) {
 
 /**
  * booking = {
- *   id, phone, cabinNumber, startISO, endISO, createdAtISO
+ *   id, phone, cabinNumber, startISO, endISO, numberOfPeople, totalPrice,
+ *   status ("pending" or "paid"), createdAtISO
  * }
  */
 export const storage = {
@@ -39,6 +40,17 @@ export const storage = {
     const filtered = all.filter((b) => !(b.id === id && b.phone === phone));
     writeAll(filtered);
     return filtered.length !== before;
+  },
+
+  updateStatus(id, status) {
+    const all = readAll();
+    const booking = all.find((b) => b.id === id);
+    if (booking) {
+      booking.status = status;
+      writeAll(all);
+      return booking;
+    }
+    return null;
   },
 
   listByPhone(phone) {

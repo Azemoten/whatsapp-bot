@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ - Управление бронированиями</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 10px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      background: #f9f9f9;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #999;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: white;
+    }
+
+    .content {
+      padding: 20px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-danger {
+      background: #ff6b6b;
+      color: white;
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    .booking-card {
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .booking-card h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #667eea;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-paid {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .booking-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #999;
+      font-size: 11px;
+    }
+
+    .info-value {
+      color: #333;
+      margin-top: 2px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .delete-btn {
+      margin-top: 8px;
+    }
+
+    .btn-approve {
+      background: #28a745;
+      color: white;
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    .btn-approve:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: #999;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+    }
+
+    .price-highlight {
+      background: #e7f5ff;
+      color: #0066cc;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .stat-card.secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card.tertiary {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: #f5f5f5;
+      padding: 10px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #ddd;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover {
+      background: #efefef;
+    }
+
+    th.sortable::after {
+      content: ' ↕';
+      font-size: 11px;
+      opacity: 0.5;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .available-slots {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .slot-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .slot-item:last-child {
+      border-bottom: none;
+    }
+
+    .slot-item:active {
+      background: #f5f5f5;
+    }
+
+    .slot-time {
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+    }
+
+    .slot-availability {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .slot-availability.available {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .slot-availability.full {
+      color: #dc3545;
+    }
+
+    @media (max-width: 400px) {
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .content {
+        padding: 15px;
+      }
+
+      .booking-info {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📅 Бронирования</h1>
+      <p>Управление бронированиями кабин</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('view')">Просмотр</button>
+      <button class="tab-btn" onclick="switchTab('add')">Добавить</button>
+      <button class="tab-btn" onclick="switchTab('stats')">Статистика</button>
+    </div>
+
+    <div class="content">
+      <!-- View Bookings Tab -->
+      <div id="view" class="tab-content active">
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="bookingsList" class="loading">Загрузка бронирований...</div>
+      </div>
+
+      <!-- Add Booking Tab -->
+      <div id="add" class="tab-content">
+        <div id="addSuccessMessage" class="success-message"></div>
+        <div id="addErrorMessage" class="error-message"></div>
+
+        <form id="bookingForm">
+          <div class="form-group">
+            <label for="phone">Номер телефона <span style="color: #999; font-size: 11px;">(опционально)</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="например, 77066041997">
+          </div>
+
+          <div class="form-group">
+            <label for="bookingDate">Дата</label>
+            <input type="date" id="bookingDate" name="bookingDate" required>
+          </div>
+
+          <div class="form-group">
+            <label for="startTime">Время начала</label>
+            <input type="time" id="startTime" name="startTime" required>
+          </div>
+
+          <div class="form-group">
+            <label for="endTime">Время окончания</label>
+            <input type="time" id="endTime" name="endTime" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cabin">Номер кабины</label>
+            <select id="cabin" name="cabin" required>
+              <option value="">Выберите кабину</option>
+              <option value="1">Кабина 1</option>
+              <option value="2">Кабина 2</option>
+              <option value="3">Кабина 3</option>
+              <option value="4">Кабина 4</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="adults">Количество взрослых</label>
+            <input type="number" id="adults" name="adults" min="0" max="10" value="1" required>
+          </div>
+
+          <div class="form-group">
+            <label for="children">Количество детей</label>
+            <input type="number" id="children" name="children" min="0" max="10" value="0" required>
+          </div>
+
+          <div class="form-group">
+            <label>Примерная цена: <span class="price-highlight" id="estimatedPrice">—</span></label>
+          </div>
+
+          <button type="submit" class="btn-primary">Создать бронирование</button>
+        </form>
+      </div>
+
+      <!-- Statistics Tab -->
+      <div id="stats" class="tab-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Всего бронирований</h3>
+            <div class="stat-value" id="totalBookings">0</div>
+          </div>
+          <div class="stat-card secondary">
+            <h3>Сегодня</h3>
+            <div class="stat-value" id="todayBookings">0</div>
+          </div>
+          <div class="stat-card tertiary">
+            <h3>Всего доход</h3>
+            <div class="stat-value" id="totalRevenue">₸0</div>
+          </div>
+          <div class="stat-card secondary">
+            <h3>Доход сегодня</h3>
+            <div class="stat-value" id="todayRevenue">₸0</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="margin-bottom: 10px; font-size: 14px; color: #333;">Статистика по телефонам</h3>
+          <div class="filter-buttons">
+            <button class="filter-btn active" onclick="loadPhoneStats('all')">Все</button>
+            <button class="filter-btn" onclick="loadPhoneStats('today')">Сегодня</button>
+            <button class="filter-btn" onclick="loadPhoneStats('month')">Месяц</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable" onclick="sortPhoneStats('phone')">Телефон</th>
+                  <th class="sortable" onclick="sortPhoneStats('count')">Бронирований</th>
+                  <th class="sortable" onclick="sortPhoneStats('revenue')">Доход</th>
+                </tr>
+              </thead>
+              <tbody id="phoneStatsTable">
+                <tr><td colspan="3" style="text-align: center; color: #999;">Загрузка...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    let config = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      loadBookings();
+      setupDateDefaults();
+      setupPriceCalculation();
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      event.target.classList.add('active');
+      
+      if (tab === 'view') {
+        loadBookings();
+      } else if (tab === 'stats') {
+        loadStats();
+      }
+    }
+
+    function setupDateDefaults() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('bookingDate').value = today;
+      setMinimumDate();
+    }
+    
+    function setMinimumDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('bookingDate').min = today;
+    }
+
+    function setupPriceCalculation() {
+      const adultsInput = document.getElementById('adults');
+      const childrenInput = document.getElementById('children');
+      adultsInput.addEventListener('change', calculatePrice);
+      childrenInput.addEventListener('change', calculatePrice);
+      
+      // Update min time when date changes
+      document.getElementById('bookingDate').addEventListener('change', updateMinTime);
+      document.getElementById('startTime').addEventListener('change', validateTimes);
+      document.getElementById('endTime').addEventListener('change', validateTimes);
+      
+      // Set initial min time
+      updateMinTime();
+    }
+    
+    function updateMinTime() {
+      const dateInput = document.getElementById('bookingDate').value;
+      const today = new Date().toISOString().split('T')[0];
+      const startTimeInput = document.getElementById('startTime');
+      
+      if (dateInput === today) {
+        // If today, set minimum time to current time
+        const now = new Date();
+        const currentTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        startTimeInput.min = currentTime;
+      } else if (dateInput > today) {
+        // If future date, allow any time (including past times)
+        startTimeInput.min = '00:00';
+      }
+    }
+    
+    function validateTimes() {
+      const dateInput = document.getElementById('bookingDate').value;
+      const today = new Date().toISOString().split('T')[0];
+      const startTime = document.getElementById('startTime').value;
+      
+      // Only validate if booking is for TODAY - past times not allowed
+      if (dateInput === today && startTime) {
+        const now = new Date();
+        const currentTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        
+        if (startTime < currentTime) {
+          document.getElementById('startTime').value = '';
+          showMessage('addErrorMessage', 'На сегодня можно бронировать только на будущее время. На другие дни можно выбрать любое время.');
+        }
+      }
+      // For future dates, any time is allowed - no validation needed
+    }
+
+    function calculatePrice() {
+      if (!config) return;
+      const adults = parseInt(document.getElementById('adults').value) || 0;
+      const children = parseInt(document.getElementById('children').value) || 0;
+      const priceAdults = adults * config.pricePerPerson;
+      const priceChildren = children * 1000; // Child price is 1000
+      const totalPrice = priceAdults + priceChildren;
+      document.getElementById('estimatedPrice').textContent = `₸${totalPrice}`;
+    }
+
+    function loadConfig() {
+      fetch(`${API_URL}/config`)
+        .then(res => res.json())
+        .then(data => {
+          config = data;
+          calculatePrice();
+        })
+        .catch(err => console.error('Failed to load config:', err));
+    }
+
+    function loadBookings() {
+      document.getElementById('bookingsList').innerHTML = '<div class="loading">Loading bookings...</div>';
+      
+      fetch(`${API_URL}/bookings`)
+        .then(res => res.json())
+        .then(bookings => {
+          if (bookings.length === 0) {
+            document.getElementById('bookingsList').innerHTML = '<div class="empty-state"><p>Нет бронирований</p></div>';
+          } else {
+            const html = bookings.map(b => {
+              const start = new Date(b.startISO).toLocaleString('ru-RU');
+              const end = new Date(b.endISO).toLocaleString('ru-RU');
+              const statusClass = b.status === 'paid' ? 'status-paid' : 'status-pending';
+              const statusText = b.status === 'paid' ? '✓ Оплачено' : '⏳ Ожидание';
+              const isApproved = b.status === 'paid';
+              return `
+                <div class="booking-card">
+                  <h3>
+                    📍 Кабина ${b.cabinNumber}
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                  </h3>
+                  <div class="booking-info">
+                    <div class="info-item">
+                      <span class="info-label">Телефон</span>
+                      <span class="info-value">${b.phone}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Взрослые</span>
+                      <span class="info-value">${b.adults || 0}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Дети</span>
+                      <span class="info-value">${b.children || 0}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Начало</span>
+                      <span class="info-value">${start}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Окончание</span>
+                      <span class="info-value">${end}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Цена</span>
+                      <span class="info-value price-highlight">₸${b.totalPrice}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">ID</span>
+                      <span class="info-value" style="font-family: monospace; font-size: 11px;">${b.id}</span>
+                    </div>
+                  </div>
+                  <div class="action-buttons">
+                    <button class="btn-approve ${isApproved ? 'disabled' : ''}" 
+                            onclick="approveBooking('${b.id}', '${isApproved}')" 
+                            ${isApproved ? 'disabled' : ''}>
+                      ${isApproved ? '✓ Одобрено' : 'Подтвердить оплату'}
+                    </button>
+                    <button class="btn-danger delete-btn" onclick="deleteBooking('${b.id}', '${b.phone}')">Удалить</button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            document.getElementById('bookingsList').innerHTML = html;
+          }
+        })
+        .catch(err => {
+          document.getElementById('bookingsList').innerHTML = `<div class="empty-state"><p>Ошибка загрузки бронирований</p></div>`;
+          console.error('Error:', err);
+        });
+    }
+
+    function approveBooking(id, isApproved) {
+      if (isApproved === 'true') return; // Already approved
+      
+      fetch(`${API_URL}/bookings/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'paid' })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showMessage('errorMessage', data.error);
+          } else {
+            showMessage('successMessage', 'Бронирование одобрено!');
+            setTimeout(() => loadBookings(), 500);
+          }
+        })
+        .catch(err => {
+          showMessage('errorMessage', 'Ошибка при одобрении бронирования');
+          console.error('Error:', err);
+        });
+    }
+
+    function deleteBooking(id, phone) {
+      if (!confirm('Удалить это бронирование?')) return;
+
+      fetch(`${API_URL}/bookings/${id}?phone=${phone}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showMessage('successMessage', 'Бронирование удалено');
+            loadBookings();
+          }
+        })
+        .catch(err => {
+          showMessage('errorMessage', 'Ошибка при удалении бронирования');
+          console.error('Error:', err);
+        });
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const phone = document.getElementById('phone').value;
+      const date = document.getElementById('bookingDate').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const cabin = document.getElementById('cabin').value;
+      const adults = parseInt(document.getElementById('adults').value) || 0;
+      const children = parseInt(document.getElementById('children').value) || 0;
+
+      if (!date || !startTime || !endTime || !cabin) {
+        showMessage('addErrorMessage', 'Заполните все поля');
+        return;
+      }
+
+      if (adults === 0 && children === 0) {
+        showMessage('addErrorMessage', 'Добавьте хотя бы одного человека');
+        return;
+      }
+
+      // Generate phone if not provided
+      const finalPhone = phone || 'admin-' + Date.now();
+
+      const startISO = new Date(date + 'T' + startTime).toISOString();
+      const endISO = new Date(date + 'T' + endTime).toISOString();
+
+      if (new Date(startISO) >= new Date(endISO)) {
+        showMessage('addErrorMessage', 'Время окончания должно быть после времени начала');
+        return;
+      }
+
+      // Calculate total price
+      const totalPrice = (adults * config.pricePerPerson) + (children * 1000);
+
+      const booking = {
+        phone: finalPhone,
+        cabinNumber: parseInt(cabin),
+        startISO,
+        endISO,
+        numberOfPeople: adults + children,
+        adults,
+        children,
+        totalPrice
+      };
+
+      fetch(`${API_URL}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(booking)
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showMessage('addErrorMessage', data.error);
+          } else {
+            showMessage('addSuccessMessage', 'Бронирование создано успешно!');
+            document.getElementById('bookingForm').reset();
+            setupDateDefaults();
+            calculatePrice();
+            setTimeout(() => loadBookings(), 1000);
+          }
+        })
+        .catch(err => {
+          showMessage('addErrorMessage', 'Ошибка при создании бронирования');
+          console.error('Error:', err);
+        });
+    });
+
+    function showMessage(elementId, message) {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.style.display = 'block';
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 3000);
+    }
+
+    // Statistics
+    let currentPhoneFilter = 'all';
+    let phoneStatsSortBy = 'revenue';
+    let phoneStatsData = [];
+
+    function loadStats() {
+      fetch(`${API_URL}/bookings`)
+        .then(res => res.json())
+        .then(bookings => {
+          updateOverallStats(bookings);
+          loadPhoneStats('all');
+        })
+        .catch(err => console.error('Error loading stats:', err));
+    }
+
+    function updateOverallStats(bookings) {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      
+      let totalBookings = bookings.length;
+      let todayBookings = 0;
+      let totalRevenue = 0;
+      let todayRevenue = 0;
+
+      bookings.forEach(b => {
+        totalRevenue += b.totalPrice;
+        const bookingDate = b.createdAtISO.split('T')[0];
+        if (bookingDate === today) {
+          todayBookings++;
+          todayRevenue += b.totalPrice;
+        }
+      });
+
+      document.getElementById('totalBookings').textContent = totalBookings;
+      document.getElementById('todayBookings').textContent = todayBookings;
+      document.getElementById('totalRevenue').textContent = `₸${totalRevenue.toLocaleString('ru-RU')}`;
+      document.getElementById('todayRevenue').textContent = `₸${todayRevenue.toLocaleString('ru-RU')}`;
+    }
+
+    function loadPhoneStats(filter) {
+      currentPhoneFilter = filter;
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      fetch(`${API_URL}/bookings`)
+        .then(res => res.json())
+        .then(bookings => {
+          phoneStatsData = groupByPhone(bookings, filter);
+          phoneStatsData.sort((a, b) => b.revenue - a.revenue);
+          renderPhoneStats();
+        })
+        .catch(err => console.error('Error:', err));
+    }
+
+    function groupByPhone(bookings, filter) {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const currentMonth = now.toISOString().slice(0, 7);
+
+      const filtered = bookings.filter(b => {
+        const bookingDate = b.createdAtISO.split('T')[0];
+        const bookingMonth = b.createdAtISO.slice(0, 7);
+        
+        if (filter === 'today') return bookingDate === today;
+        if (filter === 'month') return bookingMonth === currentMonth;
+        return true;
+      });
+
+      const grouped = {};
+      filtered.forEach(b => {
+        if (!grouped[b.phone]) {
+          grouped[b.phone] = { phone: b.phone, count: 0, revenue: 0 };
+        }
+        grouped[b.phone].count++;
+        grouped[b.phone].revenue += b.totalPrice;
+      });
+
+      return Object.values(grouped);
+    }
+
+    function sortPhoneStats(sortBy) {
+      phoneStatsSortBy = sortBy;
+      if (sortBy === 'phone') {
+        phoneStatsData.sort((a, b) => a.phone.localeCompare(b.phone));
+      } else if (sortBy === 'count') {
+        phoneStatsData.sort((a, b) => b.count - a.count);
+      } else if (sortBy === 'revenue') {
+        phoneStatsData.sort((a, b) => b.revenue - a.revenue);
+      }
+      renderPhoneStats();
+    }
+
+    function renderPhoneStats() {
+      const tbody = document.getElementById('phoneStatsTable');
+      if (phoneStatsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">Нет данных</td></tr>';
+        return;
+      }
+
+      const html = phoneStatsData.map(stat => `
+        <tr>
+          <td>${stat.phone}</td>
+          <td>${stat.count}</td>
+          <td>₸${stat.revenue.toLocaleString('ru-RU')}</td>
+        </tr>
+      `).join('');
+
+      tbody.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
